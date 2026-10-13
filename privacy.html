@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy · BatteryShare</title>
+<meta name="description" content="BatteryShare privacy policy: what battery data is handled, how it's shared between your own devices, and how to delete it.">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+
+<h1>Privacy policy</h1>
+<p class="muted">Effective 11 October 2026. Applies to the BatteryShare apps for Android and Wear OS and the BatteryShare Rings watch face (together, "BatteryShare").</p>
+
+<div class="card"><strong>In short:</strong> BatteryShare only handles battery information about your own devices, so they can show it to each other. It doesn't use your location, contacts, files or messages, has no ads or analytics, and never sells or shares your data. Cloud sync is optional and you can delete it at any time.</div>
+
+<h2>What BatteryShare handles</h2>
+<table>
+<tr><th>Data</th><th>Why</th><th>Where it goes</th></tr>
+<tr><td>Device name, model and type (for example "Galaxy Watch7")</td><td>To label each device</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
+<tr><td>Battery level, charging state, battery health and when it was last updated</td><td>The core feature: showing and alerting on battery</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
+<tr><td>Names and battery level of Bluetooth accessories paired with your phone (headphones, earbuds, speakers…)</td><td>To show their battery alongside your devices</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
+<tr><td>Find My Device requests (which device to ring, from which device, and whether it rang)</td><td>To ring a misplaced device</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
+<tr><td>Google account email and a Firebase user ID</td><td>Only if you turn on cloud sync, to keep your devices together in your account</td><td>Google Firebase Authentication</td></tr>
+</table>
+
+<h2>How it is shared</h2>
+<p><strong>Between your phone and watch</strong>, BatteryShare uses Bluetooth when they're near each other and Google's Wear OS Data Layer service (encrypted) when they're apart. This data stays within your own devices.</p>
+<p><strong>Cloud sync (optional).</strong> If you sign in with Google, the data above is stored in Google Firebase (Cloud Firestore) under your account, so your other devices, such as a tablet, can see it. Security rules let only your account read or change it. Data is encrypted in transit (TLS) and at rest by Google. Google's processing is covered by the <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a>.</p>
+<p>BatteryShare does <strong>not</strong> sell data, share it with third parties, use it for advertising, or include advertising or analytics SDKs.</p>
+
+<h2>Watch face</h2>
+<p>The BatteryShare watch face contains no code and collect no data. They only display information on your watch, including complication data you choose (from BatteryShare or other apps), which never leaves the watch through the face.</p>
+
+<h2>Permissions</h2>
+<ul>
+<li><strong>Nearby devices (Bluetooth connect)</strong>: to read the battery of Bluetooth accessories already paired with your phone. BatteryShare doesn't scan for devices or use location.</li>
+<li><strong>Notifications</strong>: low-battery and charging alerts, and the Find My Device ring.</li>
+<li><strong>Vibration, wake lock, audio settings and a short foreground service</strong>: to ring loudly and briefly (about 45 seconds) when you use Find My Device.</li>
+</ul>
+
+<h2>Keeping and deleting your data</h2>
+<p>Battery data on your devices is replaced as new readings arrive, and is removed when you uninstall the app. Cloud data is kept until you delete it. You can delete your account and all cloud data in the app (<em>Settings → Cloud sync → Delete account</em>) or by following the steps on the <a href="delete-account.html">account deletion page</a>. Signing out stops syncing but keeps your cloud data until you delete it.</p>
+
+<h2>Children</h2>
+<p>BatteryShare is not directed to children under 13 and does not knowingly collect their personal information.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, the new version will be posted on this page with a new effective date.</p>
+
+<h2>Contact</h2>
+<p>Questions or requests: <a href="mailto:legend.kay089@gmail.com">legend.kay089@gmail.com</a>.</p>
+
+<footer>
+<nav><a href="index.html">Home</a><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms</a><a href="delete-account.html">Delete account</a></nav>
+<p>Questions: <a href="mailto:legend.kay089@gmail.com">legend.kay089@gmail.com</a></p>
+</footer>
+</main>
+</body>
+</html>
