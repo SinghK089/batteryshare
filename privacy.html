@@ -15,21 +15,21 @@
 <h1>Privacy policy</h1>
 <p class="muted">Effective 11 October 2026. Applies to the BatteryShare apps for Android and Wear OS and the BatteryShare Rings watch face (together, "BatteryShare").</p>
 
-<div class="card"><strong>In short:</strong> BatteryShare only handles battery information about your own devices, so they can show it to each other. It doesn't use your location, contacts, files or messages, has no ads or analytics, and never sells or shares your data. Cloud sync is optional and you can delete it at any time.</div>
+<div class="card"><strong>In short:</strong> BatteryShare only handles battery information about your own devices, so they can show it to each other. It doesn't use your location, contacts, files or messages, has no ads or analytics, and never sells or shares your data. You sign in with Google to use the app, and you can delete your account at any time.</div>
 
 <h2>What BatteryShare handles</h2>
 <table>
 <tr><th>Data</th><th>Why</th><th>Where it goes</th></tr>
-<tr><td>Device name, model and type (for example "Galaxy Watch7")</td><td>To label each device</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
-<tr><td>Battery level, charging state, battery health and when it was last updated</td><td>The core feature: showing and alerting on battery</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
-<tr><td>Names and battery level of Bluetooth accessories paired with your phone (headphones, earbuds, speakers…)</td><td>To show their battery alongside your devices</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
-<tr><td>Find My Device requests (which device to ring, from which device, and whether it rang)</td><td>To ring a misplaced device</td><td>Your own devices; Firebase if cloud sync is on</td></tr>
-<tr><td>Google account email and a Firebase user ID</td><td>Only if you turn on cloud sync, to keep your devices together in your account</td><td>Google Firebase Authentication</td></tr>
+<tr><td>Device name, model and type (for example "Galaxy Watch7")</td><td>To label each device</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Battery level, charging state, battery health and when it was last updated</td><td>The core feature: showing and alerting on battery</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Names and battery level of Bluetooth accessories paired with your phone (headphones, earbuds, speakers…)</td><td>To show their battery alongside your devices</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Find My Device requests (which device to ring, from which device, and whether it rang)</td><td>To ring a misplaced device</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Google account email and a Firebase user ID</td><td>Required to use the app: keeps your devices together in your account</td><td>Google Firebase Authentication</td></tr>
 </table>
 
 <h2>How it is shared</h2>
 <p><strong>Between your phone and watch</strong>, BatteryShare uses Bluetooth when they're near each other and Google's Wear OS Data Layer service (encrypted) when they're apart. This data stays within your own devices.</p>
-<p><strong>Cloud sync (optional).</strong> If you sign in with Google, the data above is stored in Google Firebase (Cloud Firestore) under your account, so your other devices, such as a tablet, can see it. Security rules let only your account read or change it. Data is encrypted in transit (TLS) and at rest by Google. Google's processing is covered by the <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a>.</p>
+<p><strong>Cloud sync.</strong> You sign in with Google to use BatteryShare. The data above is stored in Google Firebase (Cloud Firestore) under your account, so your other devices, such as a tablet, can see it. Security rules let only your account read or change it. Data is encrypted in transit (TLS) and at rest by Google. Google's processing is covered by the <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a>.</p>
 <p>BatteryShare does <strong>not</strong> sell data, share it with third parties, use it for advertising, or include advertising or analytics SDKs.</p>
 
 <h2>Watch face</h2>
