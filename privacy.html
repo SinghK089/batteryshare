@@ -21,9 +21,12 @@
 <table>
 <tr><th>Data</th><th>Why</th><th>Where it goes</th></tr>
 <tr><td>Device name, model and type (for example "Galaxy Watch7")</td><td>To label each device</td><td>Your own devices and Google Firebase</td></tr>
-<tr><td>Battery level, charging state, battery health and when it was last updated</td><td>The core feature: showing and alerting on battery</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Battery level, charging state, charging power (watts), battery temperature, battery health and when it was last updated</td><td>The core feature: showing and alerting on battery</td><td>Your own devices and Google Firebase</td></tr>
 <tr><td>Names and battery level of Bluetooth accessories paired with your phone (headphones, earbuds, speakers…)</td><td>To show their battery alongside your devices</td><td>Your own devices and Google Firebase</td></tr>
 <tr><td>Find My Device requests (which device to ring, from which device, and whether it rang)</td><td>To ring a misplaced device</td><td>Your own devices and Google Firebase</td></tr>
+<tr><td>Battery history: readings and charging sessions from the past few weeks</td><td>Charging history, drain rates, overnight and weekly reports</td><td>Stored only on your phone; deleted when you sign out or uninstall</td></tr>
+<tr><td>Calendar events in the next day (only if you turn on "Before calendar events")</td><td>To remind you to charge an hour before an event with a place</td><td>Read on your phone only. Never stored or sent</td></tr>
+<tr><td>Which apps were on screen and for how long (only if you allow usage access)</td><td>To show your most-used apps since the last charge</td><td>Read on your phone only. Never stored or sent</td></tr>
 <tr><td>Google account email and a Firebase user ID</td><td>Required to use the app: keeps your devices together in your account</td><td>Google Firebase Authentication</td></tr>
 </table>
 
@@ -38,12 +41,15 @@
 <h2>Permissions</h2>
 <ul>
 <li><strong>Nearby devices (Bluetooth connect)</strong>: to read the battery of Bluetooth accessories already paired with your phone. BatteryShare doesn't scan for devices or use location.</li>
-<li><strong>Notifications</strong>: low-battery and charging alerts, and the Find My Device ring.</li>
+<li><strong>Notifications</strong>: battery alerts and reports, and the Find My Device ring.</li>
+<li><strong>Calendar (optional)</strong>: only when you turn on reminders before calendar events. BatteryShare reads the start time, title and place of events in the next day on your phone, and nothing else.</li>
+<li><strong>Usage access (optional, granted in Android settings)</strong>: only for the "Top apps" list. You can turn it off at any time in Android settings.</li>
+<li><strong>Run at startup</strong>: so morning, alarm and weekly reminders keep working after a restart.</li>
 <li><strong>Vibration, wake lock, audio settings and a short foreground service</strong>: to ring loudly and briefly (about 45 seconds) when you use Find My Device.</li>
 </ul>
 
 <h2>Keeping and deleting your data</h2>
-<p>Battery data on your devices is replaced as new readings arrive, and is removed when you uninstall the app. Cloud data is kept until you delete it. You can delete your account and all cloud data in the app (<em>Settings → Cloud sync → Delete account</em>) or by following the steps on the <a href="delete-account.html">account deletion page</a>. Signing out stops syncing but keeps your cloud data until you delete it.</p>
+<p>Battery data on your devices is replaced as new readings arrive. Battery history on your phone keeps about a week of readings and two months of charging sessions, and is removed when you sign out or uninstall the app. Cloud data is kept until you delete it. You can delete your account and all cloud data in the app (<em>Settings → Cloud sync → Delete account</em>) or by following the steps on the <a href="delete-account.html">account deletion page</a>. Signing out stops syncing but keeps your cloud data until you delete it.</p>
 
 <h2>Children</h2>
 <p>BatteryShare is not directed to children under 13 and does not knowingly collect their personal information.</p>
