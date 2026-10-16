@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Pro invite · BatteryShare</title>
+<meta name="description" content="You're invited to test BatteryShare Pro for free.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.code { font: 700 26px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 2px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; padding: 12px 20px; border-radius: 12px; border: 0; font-size: 16px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+ol li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+
+<h1>You're invited to BatteryShare Pro</h1>
+<p class="muted">Free Pro access for testers: unlimited devices, insights and history, smart alerts, reminders and reports, and every theme.</p>
+
+<div class="card" id="codeCard">
+  <p class="muted" style="margin:0 0 4px">Your invite code</p>
+  <div class="row">
+    <span class="code" id="code">—</span>
+    <button class="btn ghost" id="copy" type="button">Copy code</button>
+  </div>
+</div>
+
+<div class="card">
+<h2 style="margin-top:0">How to unlock it</h2>
+<ol>
+<li><a id="join" href="https://play.google.com/apps/internaltest/4701540532961273228">Join the BatteryShare test</a> with your Google account, then install the app from Google Play.</li>
+<li>Open BatteryShare and sign in with Google.</li>
+<li>Come back here on your phone and tap <strong>Open in BatteryShare</strong>. Pro unlocks right away.</li>
+</ol>
+<p><a class="btn" id="open" href="#">Open in BatteryShare</a></p>
+<p class="muted">Or in the app go to <strong>Settings → Redeem a code</strong> and enter the code above.</p>
+</div>
+
+<p class="muted">Pro access lasts for the number of days set for your invite, starting when you redeem it. You'll see the end date in Settings.</p>
+
+<footer>
+<nav><a href="index.html">Home</a><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms</a></nav>
+<p>Questions: <a href="mailto:pixelbearstudioz@gmail.com">pixelbearstudioz@gmail.com</a></p>
+</footer>
+</main>
+<script>
+(function () {
+  var raw = new URLSearchParams(location.search).get('code') || '';
+  var code = raw.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 40);
+  var el = document.getElementById('code');
+  var open = document.getElementById('open');
+  if (!code) {
+    el.textContent = 'No code in this link';
+    document.getElementById('copy').style.display = 'none';
+    open.style.display = 'none';
+    return;
+  }
+  el.textContent = code;
+  var join = document.getElementById('join').href;
+  var android = /Android/i.test(navigator.userAgent);
+  // Opens the app if installed, otherwise Google Play (the test page).
+  open.href = android
+    ? 'intent://pro?code=' + encodeURIComponent(code) +
+      '#Intent;scheme=batteryshare;package=com.batteryshare.app;S.browser_fallback_url=' +
+      encodeURIComponent(join) + ';end'
+    : 'batteryshare://pro?code=' + encodeURIComponent(code);
+  document.getElementById('copy').addEventListener('click', function () {
+    var btn = this;
+    function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy code'; }, 1500); }
+    if (navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
+  });
+})();
+</script>
+</body>
+</html>
