@@ -77,8 +77,13 @@ $("copy").onclick = async () => {
 };
 $("mark").onclick = async () => {
   $("mark").disabled = true;
-  for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
-  await load();
+  try {
+    for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
+    await load();
+  } catch (e) {
+    alert("Couldn't mark them as added: " + (e && e.message ? e.message : e));
+    $("mark").disabled = false;
+  }
 };
 
 onAuthStateChanged(auth, async (user) => {

@@ -39,18 +39,11 @@
   <p class="err hidden" id="signinErr"></p>
 </div>
 
-<!-- Step B: waiting -->
-<div class="card hidden" id="pending">
-  <span class="pill">Request received</span>
-  <h2>You&rsquo;re on the list</h2>
-  <p>We&rsquo;ll add <strong class="who"></strong> as a tester, usually within a few hours. Come back to this page then; it updates by itself and shows the install links.</p>
-  <p class="muted">Wrong account? <a href="#" class="switch">Use a different Google account</a>.</p>
-</div>
-
 <!-- Step C: approved -->
 <div class="card hidden" id="ready">
-  <span class="pill">You&rsquo;re in</span>
+  <span class="pill" id="status">Signed in</span>
   <h2>Install BatteryShare</h2>
+  <p id="waitNote" class="hidden">We add new testers within a few hours of signing up. If the invite says <em>App not available</em>, you haven&rsquo;t been added yet; try again a little later.</p>
   <p class="muted">Signed in as <strong class="who"></strong>. Do these on your Android phone, signed in to the Play Store with this account.</p>
   <ol class="steps">
     <li><strong>Accept the invite.</strong> <a class="btn" style="margin-top:8px" target="_blank" rel="noopener" href="https://play.google.com/apps/testing/com.batteryshare.app">Become a tester</a><br><span class="muted">Tap <em>Become a tester</em>, then <em>Download it on Google Play</em> and install. This also gives your Wear OS watch the BatteryShare watch app: open the Play Store on your watch and install it from there.</span></li>
@@ -58,7 +51,7 @@
     <li><strong>Open BatteryShare</strong> and sign in with the same Google account.</li>
     <li><strong>Unlock Pro free.</strong> <a class="btn" id="pro" style="margin-top:8px" href="#">Unlock Pro</a><br><span class="muted">Or in the app: Settings &rarr; Redeem a code &rarr; <span class="code">PRO-GEJ2JQ</span></span></li>
   </ol>
-  <p class="muted">&ldquo;App not available&rdquo;? The Play Store is signed in to a different account than <strong class="who"></strong>. Switch accounts in the Play Store and tap the invite again.</p>
+  <p class="muted">&ldquo;App not available&rdquo; after you&rsquo;ve been added? The Play Store is signed in to a different account than <strong class="who"></strong>. Switch accounts in the Play Store and tap the invite again. <a href="#" class="switch">Use a different Google account</a></p>
 </div>
 
 <p class="muted">Questions or feedback: <a href="mailto:pixelbearstudioz@gmail.com">pixelbearstudioz@gmail.com</a></p>
@@ -72,7 +65,7 @@
 import { auth, db, doc, getDoc, setDoc, serverTimestamp, onAuthStateChanged, signOut, signIn } from "./fb.js";
 
 const $ = (id) => document.getElementById(id);
-const show = (id) => ["signedOut", "pending", "ready"].forEach((x) => $(x).classList.toggle("hidden", x !== id));
+const show = (id) => ["signedOut", "ready"].forEach((x) => $(x).classList.toggle("hidden", x !== id));
 
 const code = "PRO-GEJ2JQ";
 const android = /Android/i.test(navigator.userAgent);
@@ -108,7 +101,13 @@ onAuthStateChanged(auth, async (user) => {
       });
       snap = await getDoc(ref);
     }
-    const render = (s) => show(s.exists() && s.data().added === true ? "ready" : "pending");
+    // Install steps always show; the note only says whether we've added them yet.
+    const render = (s) => {
+      const added = s.exists() && s.data().added === true;
+      $("status").textContent = added ? "You\u2019re in" : "Request received";
+      $("waitNote").classList.toggle("hidden", added);
+      show("ready");
+    };
     render(snap);
     // Check again every minute while the page is open.
     timer = setInterval(async () => render(await getDoc(ref)), 60000);
