@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tester requests · BatteryShare</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; padding: 10px 16px; border-radius: 10px; border: 0; font-size: 15px; cursor: pointer; margin: 4px 8px 4px 0; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+.btn[disabled] { opacity: .5; cursor: default; }
+textarea { width: 100%; min-height: 90px; background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 14px ui-monospace, Menlo, monospace; }
+td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+<h1>Tester requests</h1>
+
+<div class="card" id="out">
+  <p>Sign in with the developer account.</p>
+  <button class="btn" id="signin" type="button">Sign in with Google</button>
+</div>
+
+<div class="hidden" id="in">
+  <div class="card">
+    <h2 style="margin-top:0">New requests: <span id="count">0</span></h2>
+    <ol>
+      <li><button class="btn" id="copy" type="button">Copy new emails</button></li>
+      <li><a class="btn ghost" target="_blank" rel="noopener" href="https://play.google.com/console/u/0/developers/5504215413129273293/app/4972855156788476622/tracks/4701540532961273228?tab=testers">Open the tester list in Play Console</a> &rarr; arrow next to <em>BatteryShare testers</em> &rarr; paste into <em>Add email addresses</em>, press Enter &rarr; <em>Save changes</em>. One list covers the phone app, the watch app and the watch face.</li>
+      <li><button class="btn" id="mark" type="button">Mark them as added</button> <span class="muted">Their join page then shows the install links.</span></li>
+    </ol>
+    <textarea id="emails" readonly></textarea>
+  </div>
+  <table>
+    <thead><tr><th>Email</th><th>Requested</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p><a href="#" id="signout">Sign out</a></p>
+</div>
+</main>
+
+<script type="module">
+import { auth, db, collection, getDocs, query, orderBy, doc, updateDoc, onAuthStateChanged, signOut, signIn } from "./fb.js";
+const $ = (id) => document.getElementById(id);
+let pending = [];
+
+$("signin").onclick = () => signIn().catch(() => {});
+$("signout").onclick = (e) => { e.preventDefault(); signOut(auth); };
+
+async function load() {
+  const snap = await getDocs(query(collection(db, "testers"), orderBy("at", "desc")));
+  const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  pending = all.filter((t) => t.added !== true);
+  $("count").textContent = pending.length;
+  $("emails").value = pending.map((t) => t.email).join(", ");
+  $("copy").disabled = $("mark").disabled = pending.length === 0;
+  $("rows").innerHTML = "";
+  for (const t of all) {
+    const tr = document.createElement("tr");
+    const when = t.at && t.at.toDate ? t.at.toDate().toLocaleString() : "";
+    for (const [text, cls] of [[t.email, ""], [when, "small"], [t.added ? "Added" : "New", "small"]]) {
+      const td = document.createElement("td"); td.textContent = text; if (cls) td.className = cls; tr.appendChild(td);
+    }
+    $("rows").appendChild(tr);
+  }
+}
+
+$("copy").onclick = async () => {
+  $("emails").select();
+  try { await navigator.clipboard.writeText($("emails").value); $("copy").textContent = "Copied"; } catch { document.execCommand("copy"); }
+  setTimeout(() => ($("copy").textContent = "Copy new emails"), 1500);
+};
+$("mark").onclick = async () => {
+  $("mark").disabled = true;
+  for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
+  await load();
+};
+
+onAuthStateChanged(auth, async (user) => {
+  $("out").classList.toggle("hidden", !!user);
+  $("in").classList.toggle("hidden", !user);
+  if (!user) return;
+  try { await load(); } catch (e) {
+    $("in").classList.add("hidden");
+    $("out").classList.remove("hidden");
+    $("out").querySelector("p").textContent = "This account can't see tester requests. Sign in with the developer account.";
+  }
+});
+</script>
+</body>
+</html>

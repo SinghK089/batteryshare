@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join the BatteryShare beta</title>
+<meta name="description" content="Try BatteryShare and BatteryShare Pro free before launch.">
+<meta property="og:title" content="Join the BatteryShare beta">
+<meta property="og:description" content="Battery for all your devices in one place: phone, tablet, watch. Free Pro for testers.">
+<meta property="og:image" content="https://singhk089.github.io/batteryshare/icon.png">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.btn { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; padding: 13px 20px; border-radius: 12px; border: 0; font-size: 16px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+.btn[disabled] { opacity: .6; cursor: default; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+.steps li { counter-increment: s; position: relative; padding: 14px 0 14px 44px; border-top: 1px solid var(--line); }
+.steps li:first-child { border-top: 0; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 14px; }
+.code { font: 700 20px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 1px; }
+.hidden { display: none; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: rgba(36,191,243,.15); color: var(--accent); }
+.err { color: #e5484d; }
+</style>
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+
+<h1>Join the BatteryShare beta</h1>
+<p class="muted">See the battery of your phone, tablet, watch and earbuds in one place, get alerts before they die, and find a lost phone from your watch. Testers get <strong>Pro free</strong>.</p>
+
+<!-- Step A: sign in -->
+<div class="card" id="signedOut">
+  <h2 style="margin-top:0">1. Sign in with Google</h2>
+  <p>Use the Google account that your phone&rsquo;s <strong>Play Store</strong> uses. That&rsquo;s the account we give access to.</p>
+  <p><button class="btn" id="signin" type="button">Sign in with Google</button></p>
+  <p class="err hidden" id="signinErr"></p>
+</div>
+
+<!-- Step B: waiting -->
+<div class="card hidden" id="pending">
+  <span class="pill">Request received</span>
+  <h2>You&rsquo;re on the list</h2>
+  <p>We&rsquo;ll add <strong class="who"></strong> as a tester, usually within a few hours. Come back to this page then; it updates by itself and shows the install links.</p>
+  <p class="muted">Wrong account? <a href="#" class="switch">Use a different Google account</a>.</p>
+</div>
+
+<!-- Step C: approved -->
+<div class="card hidden" id="ready">
+  <span class="pill">You&rsquo;re in</span>
+  <h2>Install BatteryShare</h2>
+  <p class="muted">Signed in as <strong class="who"></strong>. Do these on your Android phone, signed in to the Play Store with this account.</p>
+  <ol class="steps">
+    <li><strong>Accept the invite.</strong> <a class="btn" style="margin-top:8px" target="_blank" rel="noopener" href="https://play.google.com/apps/testing/com.batteryshare.app">Become a tester</a><br><span class="muted">Tap <em>Become a tester</em>, then <em>Download it on Google Play</em> and install. This also gives your Wear OS watch the BatteryShare watch app: open the Play Store on your watch and install it from there.</span></li>
+    <li><strong>Have a Wear OS watch?</strong> Get the free watch face too. <a class="btn ghost" style="margin-top:8px" target="_blank" rel="noopener" href="https://play.google.com/apps/testing/com.batteryshare.app.face.rings">Watch face invite</a></li>
+    <li><strong>Open BatteryShare</strong> and sign in with the same Google account.</li>
+    <li><strong>Unlock Pro free.</strong> <a class="btn" id="pro" style="margin-top:8px" href="#">Unlock Pro</a><br><span class="muted">Or in the app: Settings &rarr; Redeem a code &rarr; <span class="code">PRO-GEJ2JQ</span></span></li>
+  </ol>
+  <p class="muted">&ldquo;App not available&rdquo;? The Play Store is signed in to a different account than <strong class="who"></strong>. Switch accounts in the Play Store and tap the invite again.</p>
+</div>
+
+<p class="muted">Questions or feedback: <a href="mailto:pixelbearstudioz@gmail.com">pixelbearstudioz@gmail.com</a></p>
+
+<footer>
+<nav><a href="index.html">Home</a><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms</a></nav>
+</footer>
+</main>
+
+<script type="module">
+import { auth, db, doc, getDoc, setDoc, serverTimestamp, onAuthStateChanged, signOut, signIn } from "./fb.js";
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => ["signedOut", "pending", "ready"].forEach((x) => $(x).classList.toggle("hidden", x !== id));
+
+const code = "PRO-GEJ2JQ";
+const android = /Android/i.test(navigator.userAgent);
+$("pro").href = android
+  ? "intent://pro?code=" + code + "#Intent;scheme=batteryshare;package=com.batteryshare.app;S.browser_fallback_url=" +
+    encodeURIComponent("https://play.google.com/apps/testing/com.batteryshare.app") + ";end"
+  : "batteryshare://pro?code=" + code;
+
+$("signin").addEventListener("click", async () => {
+  $("signin").disabled = true;
+  $("signinErr").classList.add("hidden");
+  try { await signIn(); } catch (e) {
+    $("signinErr").textContent = "Couldn't sign in. If you opened this inside WhatsApp or Instagram, open it in Chrome and try again.";
+    $("signinErr").classList.remove("hidden");
+  } finally { $("signin").disabled = false; }
+});
+document.querySelectorAll(".switch").forEach((a) => a.addEventListener("click", async (e) => { e.preventDefault(); await signOut(auth); }));
+
+let timer = null;
+onAuthStateChanged(auth, async (user) => {
+  clearInterval(timer);
+  if (!user) { show("signedOut"); return; }
+  document.querySelectorAll(".who").forEach((el) => (el.textContent = user.email));
+  const ref = doc(db, "testers", user.uid);
+  try {
+    let snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        email: user.email,
+        name: user.displayName || "",
+        at: serverTimestamp(),
+        ua: navigator.userAgent.slice(0, 200),
+      });
+      snap = await getDoc(ref);
+    }
+    const render = (s) => show(s.exists() && s.data().added === true ? "ready" : "pending");
+    render(snap);
+    // Check again every minute while the page is open.
+    timer = setInterval(async () => render(await getDoc(ref)), 60000);
+  } catch (e) {
+    show("signedOut");
+    $("signinErr").textContent = "Something went wrong saving your request. Please email pixelbearstudioz@gmail.com.";
+    $("signinErr").classList.remove("hidden");
+  }
+});
+</script>
+</body>
+</html>
