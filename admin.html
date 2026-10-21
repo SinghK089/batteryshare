@@ -32,7 +32,7 @@ td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
     <ol>
       <li><button class="btn" id="copy" type="button">Copy new emails</button></li>
       <li><a class="btn ghost" target="_blank" rel="noopener" href="https://play.google.com/console/u/0/developers/5504215413129273293/app/4972855156788476622/tracks/4701540532961273228?tab=testers">Open the tester list in Play Console</a> &rarr; arrow next to <em>BatteryShare testers</em> &rarr; paste into <em>Add email addresses</em>, press Enter &rarr; <em>Save changes</em>. One list covers the phone app, the watch app and the watch face.</li>
-      <li><button class="btn" id="mark" type="button">Mark them as added</button> <span class="muted">Their join page then shows the install links.</span></li>
+      <li><button class="btn" id="mark" type="button">Mark as added &amp; email them</button> <span class="muted">Opens a ready-to-send Gmail with everyone in BCC. Just press Send.</span></li>
     </ol>
     <textarea id="emails" readonly></textarea>
   </div>
@@ -78,7 +78,33 @@ $("copy").onclick = async () => {
 $("mark").onclick = async () => {
   $("mark").disabled = true;
   try {
+    const emails = pending.map((t) => t.email);
     for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
+    // Ready-to-send "you're in" email in Gmail, everyone in BCC (they can't see each other).
+    const subject = "You're in! Install BatteryShare";
+    const body = [
+      "Hi,",
+      "",
+      "You've been added as a BatteryShare tester. Thanks for helping out!",
+      "",
+      "Install it here (open on your Android phone):",
+      "https://singhk089.github.io/batteryshare/join.html",
+      "",
+      "1. Tap 'Become a tester', then install from Google Play.",
+      "2. Wear OS watch? The watch app installs from the Play Store on your watch, and the free watch face from the second invite on that page.",
+      "3. Open BatteryShare and sign in with the same Google account.",
+      "4. Unlock Pro free with the code PRO-GEJ2JQ (Settings > Redeem a code).",
+      "",
+      "Reply to this email with anything you notice: bugs, ideas, things that feel off.",
+      "",
+      "Kuldeep",
+      "Pixel Bear Studio",
+    ].join("\n");
+    const url = "https://mail.google.com/mail/?view=cm&fs=1" +
+      "&bcc=" + encodeURIComponent(emails.join(",")) +
+      "&su=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+    window.open(url, "_blank");
     await load();
   } catch (e) {
     alert("Couldn't mark them as added: " + (e && e.message ? e.message : e));
