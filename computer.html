@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BatteryShare for your computer</title>
+<meta name="description" content="Add your Windows laptop, MacBook or Chromebook to BatteryShare with the Chrome extension.">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.btn { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; padding: 12px 20px; border-radius: 12px; }
+ol li { margin: 8px 0; }
+code { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+<h1>BatteryShare for your computer</h1>
+<p class="muted">A Chrome extension for Windows laptops, MacBooks and Chromebooks. Your computer's battery shows up in the BatteryShare app next to your phone, watch and earbuds, and the extension shows all your devices from the Chrome toolbar.</p>
+
+<div class="card">
+<h2 style="margin-top:0">Install (beta)</h2>
+<p><a class="btn" href="batteryshare-chrome.zip" download>Download the extension</a></p>
+<ol>
+<li>Unzip <strong>batteryshare-chrome.zip</strong> into a folder you'll keep (Chrome loads it from there).</li>
+<li>In Chrome, open <code>chrome://extensions</code> and switch on <strong>Developer mode</strong> (top right).</li>
+<li>Click <strong>Load unpacked</strong> and choose the unzipped folder.</li>
+<li>Click the puzzle icon in the toolbar and pin <strong>BatteryShare</strong>.</li>
+<li>Open it and <strong>Sign in with Google</strong> using the same account as the BatteryShare app.</li>
+</ol>
+<p class="muted">It also works in Microsoft Edge and Brave (<code>edge://extensions</code>, <code>brave://extensions</code>). It updates your battery every 5 minutes while the browser is open; when the computer sleeps, the app shows it as offline.</p>
+</div>
+
+<p class="muted">The extension only reads the battery level, charging state and time left, and stores them in your BatteryShare account. See the <a href="privacy.html">privacy policy</a>.</p>
+
+<footer>
+<nav><a href="index.html">Home</a><a href="join.html">Join the beta</a><a href="privacy.html">Privacy policy</a></nav>
+</footer>
+</main>
+</body>
+</html>
