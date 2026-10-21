@@ -77,6 +77,8 @@ $("copy").onclick = async () => {
 };
 $("mark").onclick = async () => {
   $("mark").disabled = true;
+  // Open the tab now (while the click still counts), fill in Gmail once the list is saved.
+  const mailTab = window.open("about:blank", "_blank");
   try {
     const emails = pending.map((t) => t.email);
     for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
@@ -104,9 +106,10 @@ $("mark").onclick = async () => {
       "&bcc=" + encodeURIComponent(emails.join(",")) +
       "&su=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(body);
-    window.open(url, "_blank");
+    if (mailTab) mailTab.location.href = url; else window.location.href = url;
     await load();
   } catch (e) {
+    if (mailTab) mailTab.close();
     alert("Couldn't mark them as added: " + (e && e.message ? e.message : e));
     $("mark").disabled = false;
   }
