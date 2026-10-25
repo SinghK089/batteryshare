@@ -14,6 +14,9 @@
 textarea { width: 100%; min-height: 90px; background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 14px ui-monospace, Menlo, monospace; }
 td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
 .hidden { display: none; }
+#send { border-color: var(--accent); }
+#send .muted { margin: 4px 0 10px; }
+.row-link { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -32,14 +35,32 @@ td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
     <ol>
       <li><button class="btn" id="copy" type="button">Copy new emails</button></li>
       <li><a class="btn ghost" target="_blank" rel="noopener" href="https://play.google.com/console/u/0/developers/5504215413129273293/app/4972855156788476622/tracks/4701540532961273228?tab=testers">Open the tester list in Play Console</a> &rarr; arrow next to <em>BatteryShare testers</em> &rarr; paste into <em>Add email addresses</em>, press Enter &rarr; <em>Save changes</em>. One list covers the phone app, the watch app and the watch face.</li>
-      <li><button class="btn" id="mark" type="button">Mark as added &amp; email them</button> <span class="muted">Opens a ready-to-send Gmail with everyone in BCC. Just press Send.</span></li>
+      <li><button class="btn" id="mark" type="button">Mark as added</button> <span class="muted">Then send them the &ldquo;You&rsquo;re in&rdquo; email from the box that appears.</span></li>
     </ol>
     <textarea id="emails" readonly></textarea>
   </div>
+
+  <div class="card hidden" id="send">
+    <h2 style="margin-top:0">Send &ldquo;You&rsquo;re in&rdquo; to <span id="sendCount">0</span></h2>
+    <p class="muted" id="sendWho"></p>
+    <a class="btn" id="sendApp" href="#">Open in email app</a>
+    <a class="btn ghost" id="sendWeb" href="#" target="_blank" rel="noopener">Open in Gmail (web)</a>
+    <button class="btn ghost" id="sendCopy" type="button">Copy emails &amp; message</button>
+    <p class="muted" style="margin-top:10px">Everyone goes in BCC, so testers don&rsquo;t see each other&rsquo;s addresses. On your phone, use <em>Open in email app</em> and pick Gmail.</p>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Email testers again</h2>
+    <p class="muted">For anyone who didn&rsquo;t get the email, or to tell everyone about an update.</p>
+    <button class="btn ghost" id="emailAdded" type="button">Email everyone added</button>
+    <button class="btn ghost hidden" id="emailLast" type="button">Email the last batch again</button>
+  </div>
+  <div style="overflow-x:auto">
   <table>
-    <thead><tr><th>Email</th><th>Requested</th><th>Status</th></tr></thead>
+    <thead><tr><th>Email</th><th>Requested</th><th>Status</th><th></th></tr></thead>
     <tbody id="rows"></tbody>
   </table>
+  </div>
   <p><a href="#" id="signout">Sign out</a></p>
 </div>
 </main>
@@ -48,6 +69,7 @@ td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
 import { auth, db, collection, getDocs, query, orderBy, doc, updateDoc, onAuthStateChanged, signOut, signIn } from "./fb.js";
 const $ = (id) => document.getElementById(id);
 let pending = [];
+let added = [];
 
 $("signin").onclick = () => signIn().catch(() => {});
 $("signout").onclick = (e) => { e.preventDefault(); signOut(auth); };
@@ -56,6 +78,8 @@ async function load() {
   const snap = await getDocs(query(collection(db, "testers"), orderBy("at", "desc")));
   const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   pending = all.filter((t) => t.added !== true);
+  added = all.filter((t) => t.added === true).map((t) => t.email);
+  $("emailAdded").disabled = added.length === 0;
   $("count").textContent = pending.length;
   $("emails").value = pending.map((t) => t.email).join(", ");
   $("copy").disabled = $("mark").disabled = pending.length === 0;
@@ -66,6 +90,14 @@ async function load() {
     for (const [text, cls] of [[t.email, ""], [when, "small"], [t.added ? "Added" : "New", "small"]]) {
       const td = document.createElement("td"); td.textContent = text; if (cls) td.className = cls; tr.appendChild(td);
     }
+    const td = document.createElement("td");
+    if (t.added) {
+      const a = document.createElement("a");
+      a.href = "#"; a.className = "row-link"; a.textContent = "Email";
+      a.onclick = (e) => { e.preventDefault(); showSend([t.email]); };
+      td.appendChild(a);
+    }
+    tr.appendChild(td);
     $("rows").appendChild(tr);
   }
 }
@@ -75,45 +107,73 @@ $("copy").onclick = async () => {
   try { await navigator.clipboard.writeText($("emails").value); $("copy").textContent = "Copied"; } catch { document.execCommand("copy"); }
   setTimeout(() => ($("copy").textContent = "Copy new emails"), 1500);
 };
+// The "You're in" email. Sent from your own Gmail (no server), everyone in BCC.
+const SUBJECT = "You're in! Install BatteryShare";
+const BODY = [
+  "Hi,",
+  "",
+  "You've been added as a BatteryShare tester. Thanks for helping out!",
+  "",
+  "Install it here (open on your Android phone):",
+  "https://singhk089.github.io/batteryshare/join.html",
+  "",
+  "1. Tap 'Become a tester', then install from Google Play.",
+  "2. Wear OS watch? The watch app installs from the Play Store on your watch, and the free watch face from the second invite on that page.",
+  "3. Open BatteryShare and sign in with the same Google account.",
+  "4. Unlock Pro free with the code PRO-GEJ2JQ (Settings > Redeem a code).",
+  "",
+  "Please keep it installed for the next 2 weeks and open it now and then. Google needs this before the app can launch.",
+  "",
+  "Reply to this email with anything you notice: bugs, ideas, things that feel off.",
+  "",
+  "Kuldeep",
+  "Pixel Bear Studio",
+].join("\n");
+
+/** Shows the send box for these addresses (links the user taps, so phones never block them). */
+function showSend(emails) {
+  // Commas stay literal: some mail apps only split recipients on a plain comma.
+  const list = emails.map((e) => encodeURIComponent(e).replace(/%40/g, "@")).join(",");
+  $("sendCount").textContent = emails.length === 1 ? emails[0] : `${emails.length} testers`;
+  $("sendWho").textContent = emails.length > 1 ? emails.join(", ") : "";
+  // mailto opens the Gmail app on phones (and the default mail app on computers).
+  $("sendApp").href = "mailto:?bcc=" + list + "&subject=" + encodeURIComponent(SUBJECT) + "&body=" + encodeURIComponent(BODY);
+  $("sendWeb").href = "https://mail.google.com/mail/?view=cm&fs=1&bcc=" + list + "&su=" + encodeURIComponent(SUBJECT) + "&body=" + encodeURIComponent(BODY);
+  $("sendCopy").onclick = async () => {
+    const text = "BCC: " + emails.join(", ") + "\n\nSubject: " + SUBJECT + "\n\n" + BODY;
+    try { await navigator.clipboard.writeText(text); $("sendCopy").textContent = "Copied"; } catch { $("sendCopy").textContent = "Couldn't copy"; }
+    setTimeout(() => ($("sendCopy").innerHTML = "Copy emails &amp; message"), 1500);
+  };
+  // Phones: the email app is the reliable choice; computers: Gmail on the web.
+  const phone = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  $("sendApp").className = phone ? "btn" : "btn ghost";
+  $("sendWeb").className = phone ? "btn ghost" : "btn";
+  $("send").classList.remove("hidden");
+  $("send").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function lastBatch() {
+  try { return JSON.parse(localStorage.getItem("lastBatch") || "[]"); } catch { return []; }
+}
+function refreshLast() { $("emailLast").classList.toggle("hidden", lastBatch().length === 0); }
+
 $("mark").onclick = async () => {
   $("mark").disabled = true;
-  // Open the tab now (while the click still counts), fill in Gmail once the list is saved.
-  const mailTab = window.open("about:blank", "_blank");
   try {
     const emails = pending.map((t) => t.email);
     for (const t of pending) await updateDoc(doc(db, "testers", t.id), { added: true });
-    // Ready-to-send "you're in" email in Gmail, everyone in BCC (they can't see each other).
-    const subject = "You're in! Install BatteryShare";
-    const body = [
-      "Hi,",
-      "",
-      "You've been added as a BatteryShare tester. Thanks for helping out!",
-      "",
-      "Install it here (open on your Android phone):",
-      "https://singhk089.github.io/batteryshare/join.html",
-      "",
-      "1. Tap 'Become a tester', then install from Google Play.",
-      "2. Wear OS watch? The watch app installs from the Play Store on your watch, and the free watch face from the second invite on that page.",
-      "3. Open BatteryShare and sign in with the same Google account.",
-      "4. Unlock Pro free with the code PRO-GEJ2JQ (Settings > Redeem a code).",
-      "",
-      "Reply to this email with anything you notice: bugs, ideas, things that feel off.",
-      "",
-      "Kuldeep",
-      "Pixel Bear Studio",
-    ].join("\n");
-    const url = "https://mail.google.com/mail/?view=cm&fs=1" +
-      "&bcc=" + encodeURIComponent(emails.join(",")) +
-      "&su=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body);
-    if (mailTab) mailTab.location.href = url; else window.location.href = url;
+    try { localStorage.setItem("lastBatch", JSON.stringify(emails)); } catch {}
+    refreshLast();
     await load();
+    showSend(emails);
   } catch (e) {
-    if (mailTab) mailTab.close();
     alert("Couldn't mark them as added: " + (e && e.message ? e.message : e));
     $("mark").disabled = false;
   }
 };
+$("emailAdded").onclick = () => showSend(added);
+$("emailLast").onclick = () => showSend(lastBatch());
+refreshLast();
 
 onAuthStateChanged(auth, async (user) => {
   $("out").classList.toggle("hidden", !!user);
