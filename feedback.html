@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BatteryShare tester feedback</title>
+<meta name="description" content="Tell us how BatteryShare worked for you. Takes about 3 minutes.">
+<meta property="og:title" content="BatteryShare tester feedback">
+<meta property="og:description" content="Tell us how BatteryShare worked for you. Takes about 3 minutes.">
+<meta property="og:image" content="https://singhk089.github.io/batteryshare/icon.png">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; padding: 13px 20px; border-radius: 12px; border: 0; font-size: 16px; cursor: pointer; }
+.btn[disabled] { opacity: .6; cursor: default; }
+.btn.wide { width: 100%; }
+.hidden { display: none !important; }
+.err { color: #e5484d; }
+.q { margin: 0; padding: 18px 0; border-top: 1px solid var(--line); }
+.q:first-of-type { border-top: 0; padding-top: 4px; }
+.q > legend, .q > label.title { display: block; font-weight: 600; margin-bottom: 4px; padding: 0; }
+fieldset.q { border: 0; border-top: 1px solid var(--line); min-width: 0; }
+fieldset.q:first-of-type { border-top: 0; }
+.hint { display: block; font-size: 14px; color: var(--muted); margin: 0 0 10px; font-weight: 400; }
+input[type=text], textarea {
+  width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; outline: none;
+}
+input[type=text]:focus, textarea:focus { border-color: var(--accent); }
+textarea { min-height: 76px; resize: vertical; margin-top: 8px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.choices label { position: relative; }
+.choices input { position: absolute; opacity: 0; pointer-events: none; }
+.choices span {
+  display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 15px; cursor: pointer;
+  user-select: none; transition: background .12s, border-color .12s;
+}
+.choices input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+.choices input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stars span { min-width: 46px; text-align: center; }
+.section { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 28px 0 0; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+.consent input { margin-top: 5px; width: 18px; height: 18px; flex: none; }
+.who { font-size: 14px; color: var(--muted); }
+.progress { position: sticky; top: 0; height: 4px; background: var(--line); border-radius: 2px; margin: -8px 0 16px; z-index: 2; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width .2s; }
+.done-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(64,220,115,.15); color: #40dc73; display: grid; place-items: center; font-size: 28px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<main>
+<header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+
+<h1>How is BatteryShare working for you?</h1>
+<p class="muted">About 3 minutes. Answer what you've tried and skip the rest: one phone is enough. Your honest take helps most, including what you don't like.</p>
+
+<div class="card" id="signedOut">
+  <p>Sign in with the Google account you use for BatteryShare, so we know which tester this is from.</p>
+  <button class="btn" id="signin" type="button">Sign in with Google</button>
+  <p class="err hidden" id="signinErr"></p>
+</div>
+
+<form class="hidden" id="form" novalidate>
+  <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+  <p class="who">Signed in as <strong id="who"></strong> · <a href="#" id="switch">Use another account</a></p>
+
+  <div class="card">
+    <div class="q"><label class="title" for="name">Your name</label><input type="text" id="name" maxlength="60" autocomplete="name"></div>
+    <div class="q"><label class="title" for="phone">Phone model</label><span class="hint">For example Samsung Galaxy S24, Pixel 8</span><input type="text" id="phone" maxlength="60"></div>
+    <fieldset class="q"><legend>What did you use with BatteryShare?</legend><span class="hint">Pick all that apply</span>
+      <div class="choices" id="devices">
+        <label><input type="checkbox" name="devices" value="Phone" checked><span>My phone</span></label>
+        <label><input type="checkbox" name="devices" value="Earbuds or headphones"><span>Earbuds or headphones</span></label>
+        <label><input type="checkbox" name="devices" value="Watch"><span>Watch</span></label>
+        <label><input type="checkbox" name="devices" value="Tablet or second phone"><span>Tablet or second phone</span></label>
+        <label><input type="checkbox" name="devices" value="Laptop (Chrome)"><span>Laptop (Chrome)</span></label>
+      </div>
+    </fieldset>
+  </div>
+
+  <p class="section">Your phone</p>
+  <div class="card">
+    <fieldset class="q"><legend>Overall, how useful is BatteryShare?</legend>
+      <div class="choices stars" data-q="rating">
+        <label><input type="radio" name="rating" value="1"><span>1</span></label>
+        <label><input type="radio" name="rating" value="2"><span>2</span></label>
+        <label><input type="radio" name="rating" value="3"><span>3</span></label>
+        <label><input type="radio" name="rating" value="4"><span>4</span></label>
+        <label><input type="radio" name="rating" value="5"><span>5</span></label>
+      </div>
+      <span class="hint" style="margin-top:6px">1 = not useful, 5 = very useful</span>
+    </fieldset>
+    <div class="q"><label class="title" for="firstLook">First look: was it clear what the app does? Anything confusing during sign-in?</label><textarea id="firstLook" maxlength="1000"></textarea></div>
+    <fieldset class="q"><legend>Home screen: are your phone's battery, charging and time left shown correctly?</legend>
+      <div class="choices"><label><input type="radio" name="home" value="Yes"><span>Yes</span></label><label><input type="radio" name="home" value="Partly"><span>Partly</span></label><label><input type="radio" name="home" value="No"><span>No</span></label></div>
+      <textarea id="homeNote" maxlength="1000" placeholder="What looked wrong? (optional)"></textarea>
+    </fieldset>
+    <fieldset class="q"><legend>Rename your phone in the app, then close and reopen it. Did the name stay?</legend>
+      <div class="choices"><label><input type="radio" name="rename" value="Yes"><span>Yes</span></label><label><input type="radio" name="rename" value="No"><span>No</span></label><label><input type="radio" name="rename" value="Didn't try"><span>Didn't try</span></label></div>
+    </fieldset>
+    <fieldset class="q"><legend>Widget: add the BatteryShare widget to your home screen. Is it useful?</legend>
+      <div class="choices"><label><input type="radio" name="widget" value="Yes"><span>Yes</span></label><label><input type="radio" name="widget" value="Somewhat"><span>Somewhat</span></label><label><input type="radio" name="widget" value="No"><span>No</span></label><label><input type="radio" name="widget" value="Didn't try"><span>Didn't try</span></label></div>
+      <textarea id="widgetNote" maxlength="1000" placeholder="What would you want the widget to show? (optional)"></textarea>
+    </fieldset>
+    <fieldset class="q"><legend>Alerts: did you get a low battery or fully charged alert?</legend>
+      <div class="choices"><label><input type="radio" name="alerts" value="Yes, useful"><span>Yes, useful</span></label><label><input type="radio" name="alerts" value="Yes, not useful"><span>Yes, not useful</span></label><label><input type="radio" name="alerts" value="Not yet"><span>Not yet</span></label></div>
+      <textarea id="alertsNote" maxlength="1000" placeholder="Was the timing right? (optional)"></textarea>
+    </fieldset>
+    <fieldset class="q"><legend>Insights: after a day or two, open Insights. Is it clear what it's telling you?</legend>
+      <div class="choices"><label><input type="radio" name="insights" value="Clear"><span>Clear</span></label><label><input type="radio" name="insights" value="Somewhat"><span>Somewhat</span></label><label><input type="radio" name="insights" value="Confusing"><span>Confusing</span></label><label><input type="radio" name="insights" value="Didn't open"><span>Didn't open</span></label></div>
+      <textarea id="insightsNote" maxlength="1000" placeholder="What's hard to understand, or what would you want to see? (optional)"></textarea>
+    </fieldset>
+    <fieldset class="q"><legend>Pro: was unlocking Pro with the tester code easy?</legend>
+      <div class="choices"><label><input type="radio" name="pro" value="Yes"><span>Yes</span></label><label><input type="radio" name="pro" value="No"><span>No</span></label><label><input type="radio" name="pro" value="Didn't try"><span>Didn't try</span></label></div>
+    </fieldset>
+  </div>
+
+  <div id="extraBox" class="hidden">
+    <p class="section">Your other devices</p>
+    <div class="card">
+      <fieldset class="q hidden" data-dev="Earbuds or headphones"><legend>Earbuds or headphones: does their battery show up?</legend>
+        <div class="choices"><label><input type="radio" name="earbuds" value="Yes"><span>Yes</span></label><label><input type="radio" name="earbuds" value="Sometimes"><span>Sometimes</span></label><label><input type="radio" name="earbuds" value="No"><span>No</span></label></div>
+        <textarea id="earbudsNote" maxlength="1000" placeholder="Which model? Anything wrong? (optional)"></textarea>
+      </fieldset>
+      <fieldset class="q hidden" data-dev="Watch"><legend>Watch: does it show up correctly, and does Find My Device ring your phone?</legend>
+        <div class="choices"><label><input type="radio" name="watch" value="Both work"><span>Both work</span></label><label><input type="radio" name="watch" value="Partly"><span>Partly</span></label><label><input type="radio" name="watch" value="No"><span>No</span></label></div>
+        <textarea id="watchNote" maxlength="1000" placeholder="Which watch? What didn't work? (optional)"></textarea>
+      </fieldset>
+      <fieldset class="q hidden" data-dev="Tablet or second phone"><legend>Tablet or second phone: does it show up, and can you ring it?</legend>
+        <div class="choices"><label><input type="radio" name="second" value="Both work"><span>Both work</span></label><label><input type="radio" name="second" value="Partly"><span>Partly</span></label><label><input type="radio" name="second" value="No"><span>No</span></label></div>
+        <textarea id="secondNote" maxlength="1000" placeholder="Anything wrong? Any device showing twice? (optional)"></textarea>
+      </fieldset>
+      <fieldset class="q hidden" data-dev="Laptop (Chrome)"><legend>Laptop: after adding the Chrome extension, did it appear on your phone?</legend>
+        <div class="choices"><label><input type="radio" name="laptop" value="Yes"><span>Yes</span></label><label><input type="radio" name="laptop" value="Showed twice"><span>Showed twice</span></label><label><input type="radio" name="laptop" value="No"><span>No</span></label></div>
+        <textarea id="laptopNote" maxlength="1000" placeholder="Windows or Mac? Anything wrong? (optional)"></textarea>
+      </fieldset>
+    </div>
+  </div>
+
+  <p class="section">Last two</p>
+  <div class="card">
+    <div class="q"><label class="title" for="change">One thing you'd change or add?</label><textarea id="change" maxlength="1500"></textarea></div>
+    <div class="q"><label class="title" for="bugs">Any bugs or crashes?</label><span class="hint">What you were doing when it happened helps a lot</span><textarea id="bugs" maxlength="1500"></textarea></div>
+    <div class="q"><label class="consent"><input type="checkbox" id="quote" checked><span>BatteryShare may quote this feedback, with my first name only, when describing the beta test (for example to Google Play).</span></label></div>
+  </div>
+
+  <button class="btn wide" id="submit" type="submit">Send feedback</button>
+  <p class="err hidden" id="submitErr"></p>
+</form>
+
+<div class="card hidden" id="done">
+  <div class="done-icon" aria-hidden="true">✓</div>
+  <h2 style="margin-top:0">Thank you!</h2>
+  <p>Your feedback is in. I read every response and fix what I can in the next update.</p>
+  <p class="muted">Tried something new later? You can <a href="#" id="again">send more feedback</a> any time.</p>
+</div>
+
+<p class="muted">Questions: <a href="mailto:pixelbearstudioz@gmail.com">pixelbearstudioz@gmail.com</a></p>
+<footer><nav><a href="index.html">Home</a><a href="join.html">Join the beta</a><a href="privacy.html">Privacy policy</a></nav></footer>
+</main>
+
+<script type="module">
+import { auth, db, collection, addDoc, serverTimestamp, onAuthStateChanged, signOut, signIn } from "./fb.js";
+
+const $ = (id) => document.getElementById(id);
+const show = (id, on) => $(id).classList.toggle("hidden", !on);
+const radio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+const text = (id) => $(id).value.trim();
+
+$("signin").addEventListener("click", async () => {
+  $("signin").disabled = true;
+  show("signinErr", false);
+  try { await signIn(); } catch (e) {
+    $("signinErr").textContent = "Couldn't sign in. If you opened this inside WhatsApp or Instagram, open it in Chrome and try again.";
+    show("signinErr", true);
+  } finally { $("signin").disabled = false; }
+});
+$("switch").addEventListener("click", async (e) => { e.preventDefault(); await signOut(auth); });
+$("again").addEventListener("click", (e) => { e.preventDefault(); $("form").reset(); show("done", false); show("form", true); progress(); scrollTo(0, 0); });
+
+onAuthStateChanged(auth, (user) => {
+  show("signedOut", !user);
+  show("form", !!user);
+  show("done", false);
+  if (!user) return;
+  $("who").textContent = user.email;
+  if (!$("name").value) $("name").value = user.displayName || "";
+  devicesChanged();
+  progress();
+});
+
+// Questions for other devices appear only for the devices ticked.
+function devicesChanged() {
+  const picked = [...document.querySelectorAll('input[name="devices"]:checked')].map((x) => x.value);
+  let any = false;
+  document.querySelectorAll("[data-dev]").forEach((q) => {
+    const on = picked.includes(q.dataset.dev);
+    q.classList.toggle("hidden", !on);
+    any ||= on;
+  });
+  show("extraBox", any);
+}
+document.querySelectorAll('input[name="devices"]').forEach((x) => x.addEventListener("change", devicesChanged));
+
+// Progress bar: questions answered out of those shown.
+function progress() {
+  const qs = [...document.querySelectorAll("#form .q")].filter((q) => !q.closest(".hidden") && !q.classList.contains("hidden"));
+  const done = qs.filter((q) => [...q.querySelectorAll("input, textarea")].some((i) =>
+    (i.type === "radio" || i.type === "checkbox") ? (i.checked && i.id !== "quote") : i.value.trim())).length;
+  $("bar").style.width = `${Math.round((done / Math.max(1, qs.length - 1)) * 100)}%`;
+}
+$("form").addEventListener("input", progress);
+$("form").addEventListener("change", progress);
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const user = auth.currentUser;
+  if (!user) return;
+  const devices = [...document.querySelectorAll('input[name="devices"]:checked')].map((x) => x.value);
+  const shown = (dev) => devices.includes(dev);
+  const answers = {
+    phone: text("phone"),
+    devices: devices.join(", "),
+    rating: radio("rating"),
+    firstLook: text("firstLook"),
+    home: radio("home"), homeNote: text("homeNote"),
+    rename: radio("rename"),
+    widget: radio("widget"), widgetNote: text("widgetNote"),
+    alerts: radio("alerts"), alertsNote: text("alertsNote"),
+    insights: radio("insights"), insightsNote: text("insightsNote"),
+    pro: radio("pro"),
+    earbuds: shown("Earbuds or headphones") ? radio("earbuds") : "", earbudsNote: shown("Earbuds or headphones") ? text("earbudsNote") : "",
+    watch: shown("Watch") ? radio("watch") : "", watchNote: shown("Watch") ? text("watchNote") : "",
+    second: shown("Tablet or second phone") ? radio("second") : "", secondNote: shown("Tablet or second phone") ? text("secondNote") : "",
+    laptop: shown("Laptop (Chrome)") ? radio("laptop") : "", laptopNote: shown("Laptop (Chrome)") ? text("laptopNote") : "",
+    change: text("change"),
+    bugs: text("bugs"),
+  };
+  const filled = Object.entries(answers).filter(([k, v]) => v && k !== "devices").length;
+  if (filled < 2) {
+    $("submitErr").textContent = "Answer at least a couple of questions first.";
+    show("submitErr", true);
+    return;
+  }
+  $("submit").disabled = true;
+  show("submitErr", false);
+  try {
+    await addDoc(collection(db, "feedback"), {
+      uid: user.uid,
+      email: user.email,
+      name: text("name").slice(0, 60),
+      quoteOk: $("quote").checked,
+      answers,
+      ua: navigator.userAgent.slice(0, 200),
+      at: serverTimestamp(),
+    });
+    show("form", false);
+    show("done", true);
+    scrollTo(0, 0);
+  } catch (err) {
+    $("submitErr").textContent = "Couldn't send it. Check your connection and try again, or email pixelbearstudioz@gmail.com.";
+    show("submitErr", true);
+  } finally {
+    $("submit").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,11 +1,11 @@
-// Shared Firebase setup for the join and admin pages.
+// Shared Firebase setup for the join, feedback and admin pages.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   onAuthStateChanged, signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, orderBy, serverTimestamp,
+  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, getDocs, query, orderBy, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
@@ -19,7 +19,7 @@ const app = initializeApp({
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, orderBy, serverTimestamp, onAuthStateChanged, signOut };
+export { doc, getDoc, setDoc, updateDoc, addDoc, collection, getDocs, query, orderBy, serverTimestamp, onAuthStateChanged, signOut };
 
 export async function signIn() {
   const provider = new GoogleAuthProvider();

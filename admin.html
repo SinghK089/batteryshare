@@ -17,6 +17,14 @@ td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
 #send { border-color: var(--accent); }
 #send .muted { margin: 4px 0 10px; }
 .row-link { font-size: 13px; }
+.fb { padding: 14px 16px; }
+.fb-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fb-head b { font-size: 16px; }
+.fb-meta { font-size: 13px; color: var(--muted); }
+.fb dl { margin: 10px 0 0; display: grid; grid-template-columns: minmax(110px, 30%) 1fr; gap: 4px 12px; font-size: 14px; }
+.fb dt { color: var(--muted); }
+.fb dd { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-left: 6px; }
 </style>
 </head>
 <body>
@@ -61,6 +69,10 @@ td.small { font-size: 13px; color: var(--muted); white-space: nowrap; }
     <tbody id="rows"></tbody>
   </table>
   </div>
+  <h2 id="fbTitle">Tester feedback</h2>
+  <p class="muted">From <a href="feedback.html" target="_blank" rel="noopener">the feedback form</a>. Share that link with testers; each response is tied to their Google account and date.</p>
+  <p><button class="btn ghost" id="fbCopyLink" type="button">Copy form link</button><button class="btn ghost" id="fbCsv" type="button">Download all as CSV</button></p>
+  <div id="fbList"><p class="muted">No feedback yet.</p></div>
   <p><a href="#" id="signout">Sign out</a></p>
 </div>
 </main>
@@ -124,7 +136,8 @@ const BODY = [
   "",
   "Please keep it installed for the next 2 weeks and open it now and then. Google needs this before the app can launch.",
   "",
-  "Reply to this email with anything you notice: bugs, ideas, things that feel off.",
+  "After a few days, please share how it went (about 3 minutes, one phone is enough):",
+  "https://singhk089.github.io/batteryshare/feedback.html",
   "",
   "Kuldeep",
   "Pixel Bear Studio",
@@ -175,10 +188,65 @@ $("emailAdded").onclick = () => showSend(added);
 $("emailLast").onclick = () => showSend(lastBatch());
 refreshLast();
 
+// ---------- Tester feedback ----------
+const FB_LABELS = [
+  ["rating", "Overall (1–5)"], ["phone", "Phone"], ["devices", "Used with"], ["firstLook", "First look"],
+  ["home", "Home screen correct"], ["homeNote", "…note"], ["rename", "Name stayed"], ["widget", "Widget useful"],
+  ["widgetNote", "…wants on widget"], ["alerts", "Alerts"], ["alertsNote", "…note"], ["insights", "Insights clear"],
+  ["insightsNote", "…note"], ["pro", "Pro code easy"], ["earbuds", "Earbuds show"], ["earbudsNote", "…note"],
+  ["watch", "Watch + Find My Device"], ["watchNote", "…note"], ["second", "Tablet / 2nd phone"], ["secondNote", "…note"],
+  ["laptop", "Laptop appeared"], ["laptopNote", "…note"], ["change", "Would change or add"], ["bugs", "Bugs"],
+];
+let feedback = [];
+async function loadFeedback() {
+  const snap = await getDocs(query(collection(db, "feedback"), orderBy("at", "desc")));
+  feedback = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  $("fbTitle").textContent = `Tester feedback (${feedback.length})`;
+  const box = $("fbList");
+  box.innerHTML = feedback.length ? "" : '<p class="muted">No feedback yet.</p>';
+  for (const f of feedback) {
+    const card = document.createElement("div");
+    card.className = "card fb";
+    const when = f.at && f.at.toDate ? f.at.toDate().toLocaleString() : "";
+    card.innerHTML = '<div class="fb-head"><div><b></b><span class="tag"></span></div><span class="fb-meta"></span></div><div class="fb-meta email"></div><dl></dl>';
+    card.querySelector("b").textContent = f.name || f.email;
+    card.querySelector(".tag").textContent = f.quoteOk ? "OK to quote" : "Don't quote";
+    card.querySelector(".fb-head .fb-meta").textContent = when;
+    card.querySelector(".email").textContent = f.email;
+    const dl = card.querySelector("dl");
+    for (const [k, label] of FB_LABELS) {
+      const v = f.answers?.[k];
+      if (!v) continue;
+      const dt = document.createElement("dt"); dt.textContent = label;
+      const dd = document.createElement("dd"); dd.textContent = v;
+      dl.append(dt, dd);
+    }
+    box.appendChild(card);
+  }
+}
+$("fbCopyLink").onclick = async () => {
+  try { await navigator.clipboard.writeText("https://singhk089.github.io/batteryshare/feedback.html"); $("fbCopyLink").textContent = "Copied"; } catch {}
+  setTimeout(() => ($("fbCopyLink").textContent = "Copy form link"), 1500);
+};
+$("fbCsv").onclick = () => {
+  const cols = ["date", "name", "email", "quoteOk", ...FB_LABELS.map(([k]) => k)];
+  const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [cols.join(",")].concat(feedback.map((f) => [
+    f.at && f.at.toDate ? f.at.toDate().toISOString() : "", f.name, f.email, f.quoteOk ? "yes" : "no",
+    ...FB_LABELS.map(([k]) => f.answers?.[k]),
+  ].map(esc).join(",")));
+  const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = `batteryshare-feedback-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
 onAuthStateChanged(auth, async (user) => {
   $("out").classList.toggle("hidden", !!user);
   $("in").classList.toggle("hidden", !user);
   if (!user) return;
+  loadFeedback().catch(() => { $("fbList").innerHTML = '<p class="muted">Feedback appears here once the new Firestore rules are published.</p>'; });
   try { await load(); } catch (e) {
     $("in").classList.add("hidden");
     $("out").classList.remove("hidden");
