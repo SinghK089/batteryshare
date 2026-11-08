@@ -45,12 +45,21 @@ textarea { min-height: 76px; resize: vertical; margin-top: 8px; }
 .who { font-size: 14px; color: var(--muted); }
 .progress { position: sticky; top: 0; height: 4px; background: var(--line); border-radius: 2px; margin: -8px 0 16px; z-index: 2; }
 .progress i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 2px; transition: width .2s; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; margin: 0 0 12px; }
+.lang button { border: 0; background: none; color: var(--muted); font: 600 14px/1 inherit; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .done-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(64,220,115,.15); color: #40dc73; display: grid; place-items: center; font-size: 28px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
 <main>
 <header><img src="icon.png" alt=""><a href="index.html">BatteryShare</a></header>
+
+<div class="lang" role="group" aria-label="Language">
+  <button type="button" data-lang="en" aria-pressed="true">English</button>
+  <button type="button" data-lang="hi" aria-pressed="false">Hinglish</button>
+</div>
 
 <h1>How is BatteryShare working for you?</h1>
 <p class="muted">About 3 minutes. Answer what you've tried and skip the rest: one phone is enough. Your honest take helps most, including what you don't like.</p>
@@ -165,6 +174,126 @@ import { auth, db, collection, addDoc, serverTimestamp, onAuthStateChanged, sign
 
 const $ = (id) => document.getElementById(id);
 const show = (id, on) => $(id).classList.toggle("hidden", !on);
+
+// ---------- English / Hinglish ----------
+// Every visible English string and its Hinglish version. Answers are saved with the English
+// option values either way, so responses read the same on the admin page.
+const HI = {
+  "BatteryShare tester feedback": "BatteryShare tester feedback",
+  "How is BatteryShare working for you?": "BatteryShare aapke liye kaisa chal raha hai?",
+  "About 3 minutes. Answer what you've tried and skip the rest: one phone is enough. Your honest take helps most, including what you don't like.":
+    "Sirf 3 minute lagenge. Jo try kiya hai uska jawab dein, baaki skip kar dein: ek phone kaafi hai. Sach-sach batayein, jo pasand nahi aaya woh bhi.",
+  "Sign in with the Google account you use for BatteryShare, so we know which tester this is from.":
+    "Usi Google account se sign in karein jo aap BatteryShare mein use karte hain, taaki pata chale feedback kis tester ka hai.",
+  "Sign in with Google": "Google se sign in karein",
+  "Signed in as": "Sign in hai:",
+  "Use another account": "Doosra account use karein",
+  "Your name": "Aapka naam",
+  "Phone model": "Phone ka model",
+  "For example Samsung Galaxy S24, Pixel 8": "Jaise Samsung Galaxy S24, Pixel 8",
+  "What did you use with BatteryShare?": "BatteryShare ke saath kya-kya use kiya?",
+  "Pick all that apply": "Jo bhi use kiya, sab chunein",
+  "My phone": "Mera phone",
+  "Earbuds or headphones": "Earbuds ya headphones",
+  "Tablet or second phone": "Tablet ya doosra phone",
+  "Your phone": "Aapka phone",
+  "Overall, how useful is BatteryShare?": "Kul milakar, BatteryShare kitna kaam ka hai?",
+  "1 = not useful, 5 = very useful": "1 = bilkul kaam ka nahi, 5 = bahut kaam ka",
+  "First look: was it clear what the app does? Anything confusing during sign-in?":
+    "Pehli nazar mein: kya samajh aaya ki app kya karta hai? Sign-in mein koi confusion hui?",
+  "Home screen: are your phone's battery, charging and time left shown correctly?":
+    "Home screen: kya aapke phone ki battery, charging aur bacha hua time sahi dikh raha hai?",
+  "Yes": "Haan",
+  "Partly": "Thoda-bahut",
+  "No": "Nahi",
+  "What looked wrong? (optional)": "Kya galat dikha? (optional)",
+  "Rename your phone in the app, then close and reopen it. Did the name stay?":
+    "App mein apne phone ka naam badlein, phir app band karke dobara kholein. Kya naam wahi raha?",
+  "Didn't try": "Try nahi kiya",
+  "Widget: add the BatteryShare widget to your home screen. Is it useful?":
+    "Widget: BatteryShare ka widget home screen par lagayein. Kya yeh kaam ka hai?",
+  "Somewhat": "Thoda",
+  "What would you want the widget to show? (optional)": "Widget mein aap kya dekhna chahenge? (optional)",
+  "Alerts: did you get a low battery or fully charged alert?": "Alerts: kya aapko low battery ya full charge ka alert mila?",
+  "Yes, useful": "Haan, kaam ka tha",
+  "Yes, not useful": "Haan, par kaam ka nahi",
+  "Not yet": "Abhi tak nahi",
+  "Was the timing right? (optional)": "Kya alert sahi time par aaya? (optional)",
+  "Insights: after a day or two, open Insights. Is it clear what it's telling you?":
+    "Insights: ek-do din baad Insights kholein. Kya samajh aata hai ki woh kya bata raha hai?",
+  "Clear": "Samajh aaya",
+  "Confusing": "Samajh nahi aaya",
+  "Didn't open": "Khola nahi",
+  "What's hard to understand, or what would you want to see? (optional)": "Kya samajhna mushkil hai, ya aap kya dekhna chahenge? (optional)",
+  "Pro: was unlocking Pro with the tester code easy?": "Pro: tester code se Pro unlock karna aasaan tha?",
+  "Your other devices": "Aapke baaki devices",
+  "Earbuds or headphones: does their battery show up?": "Earbuds ya headphones: kya unki battery dikhti hai?",
+  "Sometimes": "Kabhi-kabhi",
+  "Which model? Anything wrong? (optional)": "Kaunsa model? Kuch galat laga? (optional)",
+  "Watch: does it show up correctly, and does Find My Device ring your phone?":
+    "Watch: kya watch sahi dikhti hai, aur kya Find My Device se phone bajta hai?",
+  "Both work": "Dono chalte hain",
+  "Which watch? What didn't work? (optional)": "Kaunsi watch? Kya nahi chala? (optional)",
+  "Tablet or second phone: does it show up, and can you ring it?": "Tablet ya doosra phone: kya woh dikhta hai, aur kya aap use baja sakte hain?",
+  "Anything wrong? Any device showing twice? (optional)": "Kuch galat laga? Koi device do baar dikh raha hai? (optional)",
+  "Laptop: after adding the Chrome extension, did it appear on your phone?": "Laptop: Chrome extension lagane ke baad, kya laptop aapke phone par dikha?",
+  "Showed twice": "Do baar dikha",
+  "Windows or Mac? Anything wrong? (optional)": "Windows ya Mac? Kuch galat laga? (optional)",
+  "Last two": "Aakhri do sawaal",
+  "One thing you'd change or add?": "Ek cheez jo aap badalna ya jodna chahenge?",
+  "Any bugs or crashes?": "Koi bug aaya ya app crash hua?",
+  "What you were doing when it happened helps a lot": "Us waqt aap kya kar rahe the, yeh batana bahut madad karega",
+  "BatteryShare may quote this feedback, with my first name only, when describing the beta test (for example to Google Play).":
+    "BatteryShare beta test ke baare mein batate waqt (jaise Google Play ko) yeh feedback sirf mere pehle naam ke saath quote kar sakta hai.",
+  "Send feedback": "Feedback bhejein",
+  "Thank you!": "Shukriya!",
+  "Your feedback is in. I read every response and fix what I can in the next update.":
+    "Aapka feedback mil gaya. Main har jawab padhta hoon aur jo ho sake agle update mein theek karta hoon.",
+  "Tried something new later? You can": "Baad mein kuch naya try kiya? Aap kabhi bhi",
+  "send more feedback": "aur feedback bhej sakte hain",
+  "any time.": ".",
+  "Questions:": "Koi sawaal?",
+  "Join the beta": "Beta join karein",
+  "Couldn't sign in. If you opened this inside WhatsApp or Instagram, open it in Chrome and try again.":
+    "Sign in nahi ho paya. Agar yeh link WhatsApp ya Instagram ke andar khula hai, to Chrome mein kholkar dobara try karein.",
+  "Answer at least a couple of questions first.": "Pehle kam se kam do sawaalon ke jawab dein.",
+  "Couldn't send it. Check your connection and try again, or email pixelbearstudioz@gmail.com.":
+    "Feedback nahi gaya. Internet check karke dobara try karein, ya pixelbearstudioz@gmail.com par email karein.",
+};
+let lang = "en";
+try { lang = localStorage.getItem("fbLang") || (/^hi/i.test(navigator.language) ? "hi" : "en"); } catch {}
+const t = (en) => (lang === "hi" && en in HI ? HI[en] : en);
+const originals = new WeakMap();
+function applyLang() {
+  document.documentElement.lang = lang === "hi" ? "hi-Latn" : "en";
+  document.title = t("BatteryShare tester feedback");
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement.closest("script, style, #who") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (!originals.has(n)) originals.set(n, n.nodeValue);
+    const en = originals.get(n), key = en.trim();
+    if (!key || !(key in HI)) continue;
+    const lead = en.match(/^\s*/)[0], tail = en.match(/\s*$/)[0];
+    const out = HI[key];
+    // Punctuation-only translations ("." for "any time.") attach to the word before them.
+    n.nodeValue = lang !== "hi" ? en : /^[.,!?]/.test(out) ? out + tail : lead + out + tail;
+  }
+  document.querySelectorAll("[placeholder]").forEach((el) => {
+    el.dataset.en ??= el.placeholder;
+    el.placeholder = t(el.dataset.en);
+  });
+  // Error lines currently showing.
+  document.querySelectorAll(".err").forEach((el) => { if (el.dataset.en) el.textContent = t(el.dataset.en); });
+  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+}
+function setErr(id, en) { $(id).dataset.en = en; $(id).textContent = t(en); show(id, true); }
+document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => {
+  lang = b.dataset.lang;
+  try { localStorage.setItem("fbLang", lang); } catch {}
+  applyLang();
+}));
+applyLang();
 const radio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || "";
 const text = (id) => $(id).value.trim();
 
@@ -172,8 +301,7 @@ $("signin").addEventListener("click", async () => {
   $("signin").disabled = true;
   show("signinErr", false);
   try { await signIn(); } catch (e) {
-    $("signinErr").textContent = "Couldn't sign in. If you opened this inside WhatsApp or Instagram, open it in Chrome and try again.";
-    show("signinErr", true);
+    setErr("signinErr", "Couldn't sign in. If you opened this inside WhatsApp or Instagram, open it in Chrome and try again.");
   } finally { $("signin").disabled = false; }
 });
 $("switch").addEventListener("click", async (e) => { e.preventDefault(); await signOut(auth); });
@@ -236,11 +364,11 @@ $("form").addEventListener("submit", async (e) => {
     laptop: shown("Laptop (Chrome)") ? radio("laptop") : "", laptopNote: shown("Laptop (Chrome)") ? text("laptopNote") : "",
     change: text("change"),
     bugs: text("bugs"),
+    lang: lang === "hi" ? "Hinglish" : "English",
   };
-  const filled = Object.entries(answers).filter(([k, v]) => v && k !== "devices").length;
+  const filled = Object.entries(answers).filter(([k, v]) => v && k !== "devices" && k !== "lang").length;
   if (filled < 2) {
-    $("submitErr").textContent = "Answer at least a couple of questions first.";
-    show("submitErr", true);
+    setErr("submitErr", "Answer at least a couple of questions first.");
     return;
   }
   $("submit").disabled = true;
@@ -259,8 +387,7 @@ $("form").addEventListener("submit", async (e) => {
     show("done", true);
     scrollTo(0, 0);
   } catch (err) {
-    $("submitErr").textContent = "Couldn't send it. Check your connection and try again, or email pixelbearstudioz@gmail.com.";
-    show("submitErr", true);
+    setErr("submitErr", "Couldn't send it. Check your connection and try again, or email pixelbearstudioz@gmail.com.");
   } finally {
     $("submit").disabled = false;
   }
